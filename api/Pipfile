@@ -10,6 +10,9 @@ sqlmodel = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
 alembic = "*"
 asyncpg = "*"
+passlib = "*"
+bcrypt = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
 
 [dev-packages]
 

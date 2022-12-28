@@ -5,12 +5,24 @@ from pydantic import (
 )
 
 class Settings(BaseSettings):
-    pg_dsn_async: PostgresDsn = Field(env='ASYNC_POSTGRES_URL')
-    pg_echo: bool = True
-
     class Config:
         env_file = '.env'
         env_file_encoding = 'utf-8'
+
+    # Postgres
+    pg_dsn_async: PostgresDsn = Field(env='ASYNC_POSTGRES_URL')
+    pg_echo: bool = True
+
+    # Authentication
+    jwt_secret_key: str
+    jwt_refresh_secret_key: str
+    jwt_algorithm: str = "HS256"
+    access_token_expiry = 30 # minutes
+    refresh_token_expiry = 60 * 24 * 7 # minutes
+
+    # Slugs
+    wishlist_slug_length = 12
+
 
 
 settings = Settings()

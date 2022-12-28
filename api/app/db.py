@@ -1,9 +1,10 @@
 from sqlmodel import SQLModel
-from config import settings
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-async_engine = create_async_engine(settings.pg_dsn, echo=settings.pg_echo, future=True)
+from app.config import settings
+
+async_engine = create_async_engine(settings.pg_dsn_async, echo=settings.pg_echo, future=True)
 
 async def init_db():
     async with async_engine.begin() as conn:
