@@ -4,7 +4,8 @@ from pydantic import ValidationError
 from datetime import datetime, timezone
 
 from ..config import settings
-from ..models.user import UserCRUD, User
+from ..models.user import User
+from ..crud import UserCRUD
 from ..constants import errors
 
 from .auth import reusable_oauth, Token

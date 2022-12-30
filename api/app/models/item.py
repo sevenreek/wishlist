@@ -2,8 +2,6 @@ from sqlmodel import SQLModel, Field, Relationship
 from pydantic import FileUrl
 from typing import TYPE_CHECKING
 
-from .crud import BaseCRUD
-
 if TYPE_CHECKING:
     from app.models import Wishlist
 class ItemBase(SQLModel):
@@ -26,7 +24,4 @@ class ItemRead(Item):
     pass
 
 class ItemUpdate(ItemBase):
-    pass
-
-class ItemCRUD(BaseCRUD):
     pass

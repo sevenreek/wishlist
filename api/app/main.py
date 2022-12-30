@@ -1,12 +1,8 @@
 import uvicorn
-from fastapi import FastAPI, status, Depends
-from enum import Enum
-from sqlmodel import Session
+from fastapi import FastAPI
 
 from .routes.auth import router as auth_router
 from .routes.wishlist import router as wishlists_router
-from app.models.item import Item, ItemCRUD, ItemRead, ItemCreate
-from app.db import get_async_session
 
 app = FastAPI()
 

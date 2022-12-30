@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends
 from typing import List
 
 from ..utils.deps import get_current_user
-from ..models.wishlist import Wishlist, WishlistCreate, WishlistRead, WishlistCRUD
+from ..models.wishlist import Wishlist, WishlistCreate, WishlistRead
 from ..models import User
+from ..crud import WishlistCRUD
 
 router = APIRouter(
     prefix='/lists',
@@ -13,6 +14,11 @@ router = APIRouter(
 
 @router.get("/{slug}", response_model=WishlistRead)
 async def details(slug: str, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
+    wishlist = await Wishlists.get_by_slug(slug)
+    return WishlistRead(**wishlist.dict())
+
+@router.patch("/{slug}", response_model=WishlistRead)
+async def update(slug: str, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     return WishlistRead(**wishlist.dict())
     

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..models.user import User, UserOut, UserCreate, UserCRUD
+from ..models.user import User, UserOut, UserCreate 
+from ..crud import UserCRUD
 from ..constants import errors
 from ..utils.auth import verify_password, create_access_token, create_refresh_token
 from ..utils.deps import get_current_user
