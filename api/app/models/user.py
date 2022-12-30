@@ -8,6 +8,7 @@ from .crud import BaseCRUD
 
 if TYPE_CHECKING:
     from ..models import Wishlist
+from ..models import UsersWishlists
 
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True)
@@ -19,7 +20,10 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     password_hash: str | None = None
-    wishlists: list['Wishlist'] = Relationship(back_populates='created_by')
+    wishlists: list['Wishlist'] = Relationship(
+        back_populates='users',
+        link_model=UsersWishlists
+    )
 class UserCreate(UserBase):
     password: str
 
@@ -32,9 +36,7 @@ class UserCRUD(BaseCRUD):
         user_coll = await self.s.execute(
             select(User).where(User.email == email)
         )
-        rval =  user_coll.fetchone()
-        if rval is None: return None
-        return rval[0]
+        return user_coll.scalar_one_or_none()
 
     async def create_user(self, data: UserCreate) -> User:
         password_hash = hash_password(data.password)
