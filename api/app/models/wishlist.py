@@ -1,7 +1,7 @@
 from sqlalchemy.orm import selectinload
 from pydantic import FileUrl
 from sqlmodel import SQLModel, Field, Relationship
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from ..utils.slugs import generate_wishlist_slug
 
@@ -30,3 +30,5 @@ class WishlistCreate(WishlistBase):
 
 class WishlistRead(Wishlist):
     pass
+class WishlistPartialUpdate(WishlistBase):
+    __annotations__ = {k: Optional[v] for k, v in WishlistBase.__annotations__.items()}

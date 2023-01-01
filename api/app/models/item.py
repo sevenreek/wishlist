@@ -1,10 +1,11 @@
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import FileUrl
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from .utils import Timestamped
 if TYPE_CHECKING:
-    from app.models import Wishlist
-class ItemBase(SQLModel):
+    from ..models import Wishlist
+class ItemBase(Timestamped):
     name: str = Field(index=True)
     image_url: FileUrl | None
     description: str | None
@@ -14,7 +15,7 @@ class ItemBase(SQLModel):
 
 class Item(ItemBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    wishlist_id: int = Field(foreign_key="wishlist.id", primary_key=True)
+    wishlist_id: int = Field(foreign_key="wishlist.id")
     wishlist: 'Wishlist' = Relationship(back_populates='items')
 
 class ItemCreate(ItemBase):
@@ -23,5 +24,5 @@ class ItemCreate(ItemBase):
 class ItemRead(Item):
     pass
 
-class ItemUpdate(ItemBase):
-    pass
+class ItemPartialUpdate(ItemBase):
+    __annotations__ = {k: Optional[v] for k, v in ItemBase.__annotations__.items()}

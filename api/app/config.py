@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     # Slugs
     wishlist_slug_length = 12
 
+    # Pagination
+    wishlist_items_limit = 25
+    wishlist_items_limit_max = 100
+
 
 
 settings = Settings()
