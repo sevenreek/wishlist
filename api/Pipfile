@@ -13,6 +13,7 @@ asyncpg = "*"
 passlib = "*"
 bcrypt = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
+pytest = "*"
 
 [dev-packages]
 
