@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 fastapi = {extras = ["all"], version = "*"}
-psycopg2 = "*"
 sqlmodel = "*"
 pydantic = {extras = ["dotenv"], version = "*"}
 alembic = "*"
@@ -13,6 +12,7 @@ asyncpg = "*"
 passlib = "*"
 bcrypt = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
+psycopg2-binary = "*"
 
 [dev-packages]
 
