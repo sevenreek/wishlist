@@ -71,7 +71,6 @@ async def create_item(slug: str, data: ItemCreate, Wishlists: WishlistCRUD = Dep
     item = await Wishlists.create_item(wishlist, data, user)
     return ItemRead(**item.dict())
     
-
 @router.patch("/{slug}/item/{item_id}", response_model=ItemRead)
 async def update_item(slug: str, item_id: int, data: ItemPartialUpdate, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)

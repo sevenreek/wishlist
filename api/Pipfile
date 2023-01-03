@@ -13,6 +13,7 @@ passlib = "*"
 bcrypt = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 psycopg2-binary = "*"
+pytest = "*"
 
 [dev-packages]
 
