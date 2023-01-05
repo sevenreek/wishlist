@@ -1,5 +1,6 @@
 version: '2'
 services:
+
   db:
     image: postgres:14.1-alpine
     restart: always
@@ -11,6 +12,16 @@ services:
       - '5432:5432'
     volumes: 
       - db:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_LISTEN_PORT=5050
+    ports:
+      - '5050:5050'
+
 volumes:
   db:
     driver: local

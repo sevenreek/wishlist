@@ -24,14 +24,14 @@ class WishlistContent(BaseModel):
 @router.get("/{slug}", response_model=WishlistContent)
 async def details(
     slug: str,
-    page:int=0,
+    page:int=1,
     limit:int=settings.wishlist_items_limit,
     Wishlists: WishlistCRUD = Depends()
 ) -> WishlistContent:
 
-    page = max(0, page)
+    page = max(1, page)
     limit = clamp(1, limit, settings.wishlist_items_limit_max)
-    offset = page * limit 
+    offset = (page-1) * limit 
     wishlist = await Wishlists.get_by_slug(slug)
     items = await Wishlists.index_wishlist_items(wishlist, offset=offset, limit=limit)
     r_wishlist = WishlistRead(**wishlist.dict())
