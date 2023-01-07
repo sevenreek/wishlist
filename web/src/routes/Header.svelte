@@ -2,9 +2,9 @@
 	import { page } from '$app/stores';
 </script>
 
-<header>
+<header class="h-[var(--topbar)]">
 
-	<nav class="flex justify-between bg-zinc-800 border-gray-200 px-2 sm:px-4 py-2.5 w-full">
+	<nav class="flex justify-between items-center bg-zinc-800 border-gray-200 px-2 sm:px-4 py-2.5 w-full h-full">
 		<ul class="text-white flex flex-row space-x-4 text-xl w-full">
 			<li aria-current={$page.url.pathname === '/' ? 'page' : undefined}>
 				<a href="/">Home</a>

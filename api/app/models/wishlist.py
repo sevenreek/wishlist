@@ -1,5 +1,4 @@
-from sqlalchemy.orm import selectinload
-from pydantic import FileUrl
+from pydantic import AnyUrl
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING, Optional
 
@@ -12,7 +11,7 @@ from .users_wishlists import UsersWishlists
 
 class WishlistBase(SQLModel):
     name: str = Field(index=True)
-    image_url: FileUrl | None
+    image_url: AnyUrl | None
     description: str | None
     
 

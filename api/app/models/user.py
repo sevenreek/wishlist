@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from pydantic import FileUrl, EmailStr
+from pydantic import AnyUrl, EmailStr
 from typing import TYPE_CHECKING
 
 
@@ -12,7 +12,7 @@ class UserBase(SQLModel):
     username: str | None = Field(index=True, default=None)
     first_name: str | None = None
     last_name: str | None = None
-    avatar_url: FileUrl | None
+    avatar_url: AnyUrl | None
 
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)

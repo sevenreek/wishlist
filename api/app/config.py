@@ -29,4 +29,4 @@ class Settings(BaseSettings):
 
 
 
-settings = Settings()
+settings = Settings() # pyright: ignore // missing args are loaded from environment variables

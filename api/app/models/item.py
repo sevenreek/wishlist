@@ -1,5 +1,5 @@
-from sqlmodel import SQLModel, Field, Relationship
-from pydantic import FileUrl
+from sqlmodel import Field, Relationship
+from pydantic import AnyUrl
 from typing import TYPE_CHECKING, Optional
 
 from .utils import Timestamped
@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from ..models import Wishlist
 class ItemBase(Timestamped):
     name: str = Field(index=True)
-    image_url: FileUrl | None
+    image_url: AnyUrl | None
     description: str | None
     quantity: int = 1
     price: int | None = None
