@@ -13,7 +13,7 @@ from ..models.item import Item, ItemCreate, ItemPartialUpdate
 
 if TYPE_CHECKING:
     from ..models import User
-    UserType = Union[User, type[NoUser]]
+UserType = Union['User', type[NoUser]]
 
 
 
