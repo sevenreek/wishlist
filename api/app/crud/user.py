@@ -1,4 +1,5 @@
-from sqlalchemy import delete, select
+from uuid import UUID
+from sqlalchemy import select
 
 from ..utils.auth import hash_password
 from .crud import BaseCRUD
@@ -13,7 +14,7 @@ class UserCRUD(BaseCRUD):
         )
         return user_coll.scalar_one_or_none()
 
-    async def find_by_uuid(self, uuid: str) -> User | None:
+    async def find_by_uuid(self, uuid: str | UUID) -> User | None:
         user_coll = await self.s.execute(
             select(User).where(User.uuid == uuid)
         )
@@ -27,5 +28,10 @@ class UserCRUD(BaseCRUD):
         await self.s.refresh(u)
         return u
         
-
+    async def create_anonymous(self) -> User:
+        u = User()
+        self.s.add(u)
+        await self.s.commit()
+        await self.s.refresh(u)
+        return u
         

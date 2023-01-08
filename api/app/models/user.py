@@ -16,7 +16,7 @@ class UserBase(UserAnonymousBase):
     username: str | None = Field(index=True, default=None)
     first_name: str | None = None
     last_name: str | None = None
-    avatar_url: AnyUrl | None
+    avatar_url: AnyUrl | None = None
 
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -32,5 +32,5 @@ class UserCreate(UserBase):
     password: str
 
 class UserOut(UserBase):
-    id: int | None
+    id: int
 
