@@ -1,14 +1,18 @@
 from sqlmodel import SQLModel, Field, Relationship
 from pydantic import AnyUrl, EmailStr
 from typing import TYPE_CHECKING
+from uuid import UUID, uuid4
 
 
 if TYPE_CHECKING:
-    from ..models import Wishlist
+    from ..models import Wishlist, Reservation
 from ..models import UsersWishlists
 
-class UserBase(SQLModel):
-    email: EmailStr = Field(unique=True, index=True)
+class UserAnonymousBase(SQLModel):
+    uuid: UUID = Field(unique=True, index=True, default_factory=uuid4)
+
+class UserBase(UserAnonymousBase):
+    email: EmailStr | None = Field(unique=True, index=True, default=None)
     username: str | None = Field(index=True, default=None)
     first_name: str | None = None
     last_name: str | None = None
@@ -21,7 +25,10 @@ class User(UserBase, table=True):
         back_populates='users',
         link_model=UsersWishlists
     )
+    reservations: list['Reservation'] = Relationship(back_populates='reserved_by')
+
 class UserCreate(UserBase):
+    email: EmailStr
     password: str
 
 class UserOut(UserBase):

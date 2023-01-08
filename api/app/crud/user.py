@@ -13,6 +13,12 @@ class UserCRUD(BaseCRUD):
         )
         return user_coll.scalar_one_or_none()
 
+    async def find_by_uuid(self, uuid: str) -> User | None:
+        user_coll = await self.s.execute(
+            select(User).where(User.uuid == uuid)
+        )
+        return user_coll.scalar_one_or_none()
+
     async def create_user(self, data: UserCreate) -> User:
         password_hash = hash_password(data.password)
         u = User(**data.dict(exclude={'password'}), password_hash=password_hash)

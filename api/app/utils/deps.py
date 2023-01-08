@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from jose import jwt
+from jose import jwt, JWTError
 from pydantic import ValidationError
 from datetime import datetime, timezone
 
@@ -16,7 +16,7 @@ async def get_current_user(token: str = Depends(reusable_oauth), Users: UserCRUD
         token_data = Token(**payload)
         if token_data.exp < datetime.now(tz=timezone.utc):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=errors.TOKEN_EXPIRED, headers={"WWW-Authenticate": "Bearer"})
-    except(jwt.JWTError, ValidationError) as e:
+    except(JWTError, ValidationError) as e:
         print(e)
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=errors.CREDENTIALS_INVALID, headers={"WWW-Authenticate": "Bearer"})
     user = await Users.find_by_email(token_data.content)

@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status, Depends
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, func
 from typing import TYPE_CHECKING, Union
 from asyncpg.exceptions import UniqueViolationError
 
@@ -7,25 +7,24 @@ from ..constants import errors
 from ..utils.slugs import DEFAULT_SLUG_UNIQUENESS_ATTEMPTS
 from .crud import BaseCRUD, NoUser
 from ..config import settings
-from ..models import UsersWishlists
+from ..models import UsersWishlists, Reservation
 from ..models.wishlist import Wishlist, WishlistCreate, WishlistPartialUpdate
-from ..models.item import Item, ItemCreate, ItemPartialUpdate
+from ..models.item import Item, ItemCreate, ItemPartialUpdate, ItemOut
 
 if TYPE_CHECKING:
     from ..models import User
+
 UserType = Union['User', type[NoUser]]
 
-
-
 class WishlistCRUD(BaseCRUD):
-    async def get(self, id: int) -> Wishlist| None:
+    async def get(self, id: int) -> Wishlist:
         result = await self.s.execute(
             select(Wishlist).where(Wishlist.id == id).limit(1)
         )
         if (result := result.scalar_one_or_none()) is not None: return result
         else: raise HTTPException(status_code = 404, detail=errors.RECORD_NOT_FOUND)
 
-    async def get_by_slug(self, slug: str) -> Wishlist | None:
+    async def get_by_slug(self, slug: str) -> Wishlist:
         result = await self.s.execute(
             select(Wishlist).where(Wishlist.slug == slug).limit(1)
         )
@@ -76,7 +75,7 @@ class WishlistCRUD(BaseCRUD):
         await self.s.commit()
 
     # Items
-    async def get_item(self, wishlist: 'Wishlist', item_id: int) -> Item | None:
+    async def get_item(self, wishlist: 'Wishlist', item_id: int) -> Item:
         result = await self.s.execute(
             select(Item).where(Item.wishlist_id == wishlist.id).where(Item.id == item_id)
         )
@@ -85,14 +84,20 @@ class WishlistCRUD(BaseCRUD):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=errors.RECORD_NOT_FOUND)
         return result
 
-    async def index_wishlist_items(self, wishlist: 'Wishlist', *, offset=0, limit=settings.wishlist_items_limit, order_by=Item.created_at) -> list['Item']:
-        stmt = (select(Item) 
-            .where(Item.wishlist_id == wishlist.id)
-            .order_by(order_by)
-            .offset(offset)
-            .limit(limit))
+    async def index_wishlist_items(self, wishlist: 'Wishlist', *, offset=0, limit=settings.wishlist_items_limit, order_by=Item.created_at) -> list['ItemOut']:
+        stmt = (
+            select(Item, func.count(Reservation.id).label('reserved')) 
+                .where(Item.wishlist_id == wishlist.id)
+                .order_by(order_by)
+                .outerjoin(Reservation)
+                .group_by(Item.id)
+                .offset(offset)
+                .limit(limit)
+        )
         result = await self.s.execute(stmt)
-        return result.scalars().all()
+        rows = result.all()
+        items = [ItemOut(**row['Item'].dict(), reserved=row['reserved']) for row in rows]
+        return items
 
     async def create_item(self, in_wishlist: 'Wishlist', data: 'ItemCreate', as_user: UserType = NoUser) -> 'Item':
         await self._ensure_user_can_modify_wishlist(in_wishlist, as_user)
@@ -113,3 +118,4 @@ class WishlistCRUD(BaseCRUD):
         await self._ensure_user_can_modify_wishlist(in_wishlist, as_user)
         await self.s.delete(item)
         await self.s.commit()
+
