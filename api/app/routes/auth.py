@@ -23,7 +23,7 @@ async def signup(data: UserCreate, Users: UserCRUD = Depends()):
 @router.post('/login')
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), Users: UserCRUD = Depends()):
     existing_user = await Users.find_by_email(form_data.username)
-    if existing_user is None or not verify_password(form_data.password, existing_user.password_hash):
+    if existing_user is None or existing_user.password_hash is None or not verify_password(form_data.password, existing_user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=errors.CREDENTIALS_INVALID)
     return {
         "access_token": create_access_token(existing_user.uuid),

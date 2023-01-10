@@ -32,11 +32,15 @@ class Settings(BaseSettings):
     # Tests
     test_db_name: str = Field(env='TEST_DB_NAME')
 
-    def get_db_url(self):
-        return f"{self.pg_dsn}/{self.db_name}"
+    def _get_db_name(self, test=False):
+        if test: return self.test_db_name 
+        else: return self.db_name
 
-    def get_async_db_url(self):
-        return f"{self.pg_dsn_async}/{self.db_name}"
+    def get_db_url(self, test=False):
+        return f"{self.pg_dsn}/{self._get_db_name(test)}"
+
+    def get_async_db_url(self, test=False):
+        return f"{self.pg_dsn_async}/{self._get_db_name(test)}"
 
 
 settings = Settings() # pyright: ignore // missing args are loaded from environment variables

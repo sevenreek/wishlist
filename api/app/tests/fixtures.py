@@ -12,8 +12,8 @@ from ..db import get_async_session
 
 @pytest.fixture(name="asession")
 async def async_session_fixture():
-    db_url = settings.get_db_url()
-    async_db_url = settings.get_async_db_url()
+    db_url = settings.get_db_url(test=True)
+    async_db_url = settings.get_async_db_url(test=True)
 
     if not database_exists(db_url):
         create_database(db_url)
