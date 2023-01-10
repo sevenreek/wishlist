@@ -1,3 +1,4 @@
+from typing import AsyncIterable
 from uuid import UUID
 import pytest
 from sqlalchemy import select
@@ -16,7 +17,7 @@ async def anon_user_fixture(asession: AsyncSession) -> User:
     return u
 
 @pytest.fixture(name="user")
-async def user_fixture(asession: AsyncSession) -> User:
+async def user_fixture(asession: AsyncSession) -> AsyncIterable[User]:
     u = User(
         email="user@example.com", # pyright: ignore
         username="username",
@@ -28,7 +29,10 @@ async def user_fixture(asession: AsyncSession) -> User:
     asession.add(u)
     await asession.commit()
     await asession.refresh(u)
-    return u
+    yield u
+    await asession.delete(u)
+    await asession.commit()
+
 
 @pytest.mark.asyncio
 async def test_signup(aclient: AsyncClient, asession: AsyncSession):
@@ -74,6 +78,22 @@ async def test_login(aclient: AsyncClient, user: User):
     data = response.json()
     response_user = UserOut(**data['user'])
     user_in_db = UserOut(**user.dict())
+    assert response_user == user_in_db
+    assert data['access_token']
+    assert data['refresh_token']
+
+@pytest.mark.asyncio
+async def test_alogin(aclient: AsyncClient, anon_user: User):
+    response = await aclient.post(
+        "/auth/alogin",
+        json={
+            'uuid': str(anon_user.uuid)
+        }
+    )
+    assert response.status_code == 200
+    data = response.json()
+    response_user = UserOut(**data['user'])
+    user_in_db = UserOut(**anon_user.dict())
     assert response_user == user_in_db
     assert data['access_token']
     assert data['refresh_token']

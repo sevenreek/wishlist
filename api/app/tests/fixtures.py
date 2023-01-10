@@ -27,7 +27,9 @@ async def async_session_fixture():
     async with async_session() as session:
         yield session
 
-    drop_database(db_url)
+    async with async_engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.drop_all)
+    # drop_database(db_url)
 
 @pytest.fixture(name="client")
 async def client_fixture(asession: AsyncSession):
