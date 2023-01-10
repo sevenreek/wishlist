@@ -14,6 +14,8 @@ bcrypt = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 psycopg2-binary = "*"
 pytest = "*"
+sqlalchemy-utils = "*"
+pytest-asyncio = "*"
 
 [dev-packages]
 

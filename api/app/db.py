@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.config import settings
 
-async_engine = create_async_engine(settings.pg_dsn_async, echo=settings.pg_echo, future=True)
+async_engine = create_async_engine(settings.get_async_db_url(), echo=settings.pg_echo, future=True)
 
 async def init_db():
     async with async_engine.begin() as conn:

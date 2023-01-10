@@ -11,7 +11,9 @@ class Settings(BaseSettings):
 
     # Postgres
     pg_dsn_async: PostgresDsn = Field(env='ASYNC_POSTGRES_URL')
+    pg_dsn: PostgresDsn = Field(env='POSTGRES_URL')
     pg_echo: bool = True
+    db_name: str = Field(env='DB_NAME')
 
     # Authentication
     jwt_secret_key: str
@@ -27,6 +29,14 @@ class Settings(BaseSettings):
     wishlist_items_limit = 25
     wishlist_items_limit_max = 100
 
+    # Tests
+    test_db_name: str = Field(env='TEST_DB_NAME')
+
+    def get_db_url(self):
+        return f"{self.pg_dsn}/{self.db_name}"
+
+    def get_async_db_url(self):
+        return f"{self.pg_dsn_async}/{self.db_name}"
 
 
 settings = Settings() # pyright: ignore // missing args are loaded from environment variables

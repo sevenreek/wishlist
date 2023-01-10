@@ -28,7 +28,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), Users: UserCRU
     return {
         "access_token": create_access_token(existing_user.uuid),
         "refresh_token": create_refresh_token(existing_user.uuid),
-        "token_type": 'bearer'
+        "token_type": 'bearer',
+        "user": UserOut(**existing_user.dict()).dict()
     }
     
 @router.post('/alogin')
@@ -39,7 +40,8 @@ async def login_anonymous(uuid: UUID = Body(embed=True), Users: UserCRUD = Depen
     return {
         "access_token": create_access_token(existing_user.uuid),
         "refresh_token": create_refresh_token(existing_user.uuid),
-        "token_type": 'bearer'
+        "token_type": 'bearer',
+        "user": UserOut(**existing_user.dict()).dict()
     }
 
 @router.post('/asignup')
