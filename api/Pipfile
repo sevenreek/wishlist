@@ -16,6 +16,7 @@ psycopg2-binary = "*"
 pytest = "*"
 sqlalchemy-utils = "*"
 pytest-asyncio = "*"
+faker = "*"
 
 [dev-packages]
 

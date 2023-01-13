@@ -1,3 +1,4 @@
+from typing import AsyncIterable
 import pytest
 from sqlmodel import SQLModel
 from fastapi.testclient import TestClient
@@ -6,6 +7,8 @@ from sqlalchemy_utils import database_exists, create_database, drop_database
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+from ..models.user import User
+from ..utils.auth import hash_password
 from ..main import app
 from ..config import settings
 from ..db import get_async_session
@@ -48,3 +51,30 @@ async def async_client_fixture(asession: AsyncSession):
     aclient = AsyncClient(app=app, base_url='http://localhost:8000')
     yield aclient 
     app.dependency_overrides.clear() 
+
+@pytest.fixture(name="anon_user")
+async def anon_user_fixture(asession: AsyncSession) -> User:
+    u = User()
+    asession.add(u)
+    await asession.commit()
+    await asession.refresh(u)
+    return u
+
+@pytest.fixture(name="user")
+async def user_fixture(asession: AsyncSession) -> AsyncIterable[User]:
+    u = User(
+        email="user@example.com", # pyright: ignore
+        username="username",
+        first_name="John",
+        last_name="Doe",
+        password_hash=hash_password("password"),
+        avatar_url="http://example.com" # pyright: ignore
+    ) 
+    asession.add(u)
+    await asession.commit()
+    await asession.refresh(u)
+    yield u
+    await asession.delete(u)
+    await asession.commit()
+
+

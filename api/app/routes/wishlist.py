@@ -35,22 +35,26 @@ async def details(
     wishlist = await Wishlists.get_by_slug(slug)
     items = await Wishlists.index_wishlist_items(wishlist, offset=offset, limit=limit)
     r_wishlist = WishlistRead(**wishlist.dict())
+    await Wishlists.commit()
     return WishlistContent(wishlist=r_wishlist, items=items)
 
 @router.patch("/{slug}", response_model=WishlistRead)
 async def update(slug: str, data: WishlistPartialUpdate, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     wishlist = await Wishlists.update(wishlist, data, user)
+    await Wishlists.commit()
     return WishlistRead(**wishlist.dict())
     
 @router.delete("/{slug}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete(slug: str, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     await Wishlists.delete(wishlist, user)
+    await Wishlists.commit()
 
 @router.post("/", response_model=WishlistRead)
 async def create(data: WishlistCreate, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.create(data, user)
+    await Wishlists.commit()
     return WishlistRead(**wishlist.dict())
     
 @router.get("/", response_model=List[WishlistRead])
@@ -69,6 +73,7 @@ async def item_details(slug: str, item_id: int, Wishlists: WishlistCRUD = Depend
 async def create_item(slug: str, data: ItemCreate, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.create_item(wishlist, data, user)
+    await Wishlists.commit()
     return ItemOut(**item.dict())
     
 @router.patch("/{slug}/item/{item_id}", response_model=ItemOut)
@@ -76,6 +81,7 @@ async def update_item(slug: str, item_id: int, data: ItemPartialUpdate, Wishlist
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.get_item(wishlist, item_id)
     item = await Wishlists.update_item(wishlist, item, data, user)
+    await Wishlists.commit()
     return ItemOut(**item.dict())
     
 @router.delete("/{slug}/item/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -83,4 +89,5 @@ async def delete_item(slug: str, item_id: int, Wishlists: WishlistCRUD = Depends
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.get_item(wishlist, item_id)
     await Wishlists.delete_item(wishlist, item, user)
+    await Wishlists.commit()
    

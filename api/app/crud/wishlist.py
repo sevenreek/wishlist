@@ -37,7 +37,6 @@ class WishlistCRUD(BaseCRUD):
             wishlist = Wishlist(**data.dict(), users=[user])
             self.s.add(wishlist)
             try:
-                await self.s.commit()
                 await self.s.refresh(wishlist)
             except UniqueViolationError:
                 continue
@@ -54,8 +53,6 @@ class WishlistCRUD(BaseCRUD):
     async def update(self, wishlist: 'Wishlist', data: WishlistPartialUpdate, as_user: UserType = NoUser) -> Wishlist:
         await self._ensure_user_can_modify_wishlist(wishlist, as_user)
         self.s.add(wishlist.copy(update=data.dict(exclude_unset=True)))
-        await self.s.commit()
-        await self.s.refresh(wishlist)
         return wishlist
 
     async def _ensure_user_can_modify_wishlist(self, wishlist: 'Wishlist', user: UserType = NoUser) -> None:
@@ -72,7 +69,6 @@ class WishlistCRUD(BaseCRUD):
     async def delete(self, wishlist: 'Wishlist', as_user: UserType = NoUser) -> None:
         await self._ensure_user_can_modify_wishlist(wishlist, as_user)
         await self.s.delete(wishlist)
-        await self.s.commit()
 
     # Items
     async def get_item(self, wishlist: 'Wishlist', item_id: int) -> Item:
@@ -103,19 +99,14 @@ class WishlistCRUD(BaseCRUD):
         await self._ensure_user_can_modify_wishlist(in_wishlist, as_user)
         item = Item(**data.dict(), wishlist=in_wishlist)
         self.s.add(item)
-        await self.s.commit()
-        await self.s.refresh(item)
         return item
         
     async def update_item(self, in_wishlist: 'Wishlist', item: 'Item', data: 'ItemPartialUpdate', as_user: UserType = NoUser) -> 'Item':
         await self._ensure_user_can_modify_wishlist(in_wishlist, as_user)
         self.s.add(item.copy(update=data.dict(exclude_unset=True)))
-        await self.s.commit()
-        await self.s.refresh(item)
         return item
 
     async def delete_item(self, in_wishlist: 'Wishlist', item: 'Item', as_user: UserType = NoUser) -> None:
         await self._ensure_user_can_modify_wishlist(in_wishlist, as_user)
         await self.s.delete(item)
-        await self.s.commit()
 

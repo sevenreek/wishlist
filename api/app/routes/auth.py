@@ -18,6 +18,7 @@ async def signup(data: UserCreate, Users: UserCRUD = Depends()):
     existing_user = await Users.find_by_email(data.email)
     if existing_user is not None: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=errors.USER_ALREADY_EXISTS)
     new_user = await Users.create_user(data)
+    await Users.commit()
     return UserOut(**new_user.dict())
 
 @router.post('/login')
@@ -47,6 +48,7 @@ async def login_anonymous(uuid: UUID = Body(embed=True), Users: UserCRUD = Depen
 @router.post('/asignup')
 async def signup_anonymous(Users: UserCRUD = Depends()):
     new_user = await Users.create_anonymous()
+    await Users.commit()
     return UserOut(**new_user.dict())
 
 @router.get('/me', response_model=UserOut)

@@ -8,4 +8,7 @@ class BaseCRUD():
     def __init__(self, session: AsyncSession = Depends(get_async_session)):
         self.s = session
 
+    async def commit(self):
+        await self.s.commit()
+
 

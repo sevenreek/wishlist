@@ -7,33 +7,6 @@ from app.models.user import User, UserOut
 from app.utils.auth import hash_password
 from .fixtures import *
 
-
-@pytest.fixture(name="anon_user")
-async def anon_user_fixture(asession: AsyncSession) -> User:
-    u = User()
-    asession.add(u)
-    await asession.commit()
-    await asession.refresh(u)
-    return u
-
-@pytest.fixture(name="user")
-async def user_fixture(asession: AsyncSession) -> AsyncIterable[User]:
-    u = User(
-        email="user@example.com", # pyright: ignore
-        username="username",
-        first_name="John",
-        last_name="Doe",
-        password_hash=hash_password("password"),
-        avatar_url="http://example.com" # pyright: ignore
-    ) 
-    asession.add(u)
-    await asession.commit()
-    await asession.refresh(u)
-    yield u
-    await asession.delete(u)
-    await asession.commit()
-
-
 @pytest.mark.asyncio
 async def test_signup(aclient: AsyncClient, asession: AsyncSession):
     response = await aclient.post(
@@ -81,6 +54,21 @@ async def test_login(aclient: AsyncClient, user: User):
     assert response_user == user_in_db
     assert data['access_token']
     assert data['refresh_token']
+
+@pytest.mark.asyncio
+async def test_asignup(aclient: AsyncClient, asession: AsyncSession):
+    response = await aclient.post(
+        "/auth/asignup"
+    )
+    assert response.status_code == 200
+    response_user = UserOut(**response.json())
+    user_in_db = await asession.execute(select(User).limit(1))
+    user_in_db = user_in_db.fetchone()
+    assert user_in_db is not None
+    user_in_db = user_in_db['User'].dict()
+    user_in_db = UserOut(**user_in_db)
+    assert response_user == user_in_db
+
 
 @pytest.mark.asyncio
 async def test_alogin(aclient: AsyncClient, anon_user: User):

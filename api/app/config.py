@@ -31,6 +31,7 @@ class Settings(BaseSettings):
 
     # Tests
     test_db_name: str = Field(env='TEST_DB_NAME')
+    test_user_password: str = '123qwe!@#QWE'
 
     def _get_db_name(self, test=False):
         if test: return self.test_db_name 

@@ -24,14 +24,12 @@ class UserCRUD(BaseCRUD):
         password_hash = hash_password(data.password)
         u = User(**data.dict(exclude={'password'}), password_hash=password_hash)
         self.s.add(u)
-        await self.s.commit()
-        await self.s.refresh(u)
+        await self.s.flush()
         return u
         
     async def create_anonymous(self) -> User:
         u = User()
         self.s.add(u)
-        await self.s.commit()
-        await self.s.refresh(u)
+        await self.s.flush()
         return u
         
