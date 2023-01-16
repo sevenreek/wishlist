@@ -29,5 +29,6 @@ class WishlistCreate(WishlistBase):
 
 class WishlistRead(Wishlist):
     pass
+
 class WishlistPartialUpdate(WishlistBase):
     __annotations__ = {k: Optional[v] for k, v in WishlistBase.__annotations__.items()}

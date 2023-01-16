@@ -1,40 +1,24 @@
-from typing import AsyncIterable
-from uuid import UUID
 import pytest
 from sqlalchemy import select
 
-from app.models import Wishlist
+from app.models import Wishlist, Item, UsersWishlists, Reservation
+from ..models.item import ItemOut
+from ..models.wishlist import WishlistRead
 from .fixtures import *
-
-@pytest.fixture(name="Wishlists")
-async def wishlist_factory_fixture(user: User, asession: AsyncSession) -> Wishlist:
-    w = Wishlist(
-        name="name",
-        image_url="http://example.com", #pyright: ignore
-        description="description",
-        users=[user],
-        items=[
-        ]
-    )
-    asession.add(w)
-    await asession.commit()
-    await asession.refresh(w)
-    return w
+from .factories import *
 
 @pytest.mark.asyncio
-async def test_details(aclient: AsyncClient, user: User):
-    response = await aclient.post(
-        "/auth/login",
-        data={
-            'grant_type': 'password',
-            'username': 'user@example.com',
-            'password': 'password',
-        }
+async def test_details(aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], Items: ModelFactory[Item]):
+    wishlist = await Wishlists.create(items=[])
+    items = await Items.create_list(5, wishlist_id=wishlist.id)
+    await asession.commit()
+    response = await aclient.get(
+        f"/lists/{wishlist.slug}"
     )
     assert response.status_code == 200
     data = response.json()
-    response_user = UserOut(**data['user'])
-    user_in_db = UserOut(**user.dict())
-    assert response_user == user_in_db
-    assert data['access_token']
-    assert data['refresh_token']
+    obtained_wishlist = WishlistRead(**data['wishlist'])
+    obtained_items = [ItemOut(**item) for item in data['items']]
+    assert obtained_wishlist == wishlist
+    for item in obtained_items:
+        assert any((ItemOut(**actual_item.dict(), reserved=0) == item for actual_item in items))

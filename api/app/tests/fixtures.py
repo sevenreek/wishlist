@@ -1,4 +1,5 @@
 from typing import AsyncIterable
+import asyncio
 import pytest
 from sqlmodel import SQLModel
 from fastapi.testclient import TestClient
@@ -13,7 +14,15 @@ from ..main import app
 from ..config import settings
 from ..db import get_async_session
 
-@pytest.fixture(name="asession")
+@pytest.fixture(scope="session")
+def event_loop():
+    """Overrides pytest default function scoped event loop"""
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
+
+@pytest.fixture(name="asession", scope="session")
 async def async_session_fixture():
     db_url = settings.get_db_url(test=True)
     async_db_url = settings.get_async_db_url(test=True)
@@ -34,7 +43,7 @@ async def async_session_fixture():
         await conn.run_sync(SQLModel.metadata.drop_all)
     # drop_database(db_url)
 
-@pytest.fixture(name="client")
+@pytest.fixture(name="client", scope="session")
 async def client_fixture(asession: AsyncSession):
     async def get_session_override():
         return asession
@@ -43,7 +52,7 @@ async def client_fixture(asession: AsyncSession):
     yield client 
     app.dependency_overrides.clear() 
 
-@pytest.fixture(name="aclient")
+@pytest.fixture(name="aclient", scope="session")
 async def async_client_fixture(asession: AsyncSession):
     async def get_session_override():
         return asession
