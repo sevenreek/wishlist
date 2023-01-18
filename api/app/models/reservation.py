@@ -14,7 +14,7 @@ class Reservation(ReservationBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     item_id: int = Field(foreign_key="item.id")
     item: 'Item' = Relationship(back_populates='reservations')
-    reserved_by_id: int = Field(foreign_key="user.id")
+    reserved_by_id: int | None = Field(foreign_key="user.id")
     reserved_by: 'User' = Relationship()
 
 class ReservationCreate(ReservationBase):

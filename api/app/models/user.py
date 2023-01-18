@@ -23,7 +23,8 @@ class User(UserBase, table=True):
     password_hash: str | None = None
     wishlists: list['Wishlist'] = Relationship(
         back_populates='users',
-        link_model=UsersWishlists
+        link_model=UsersWishlists,
+        sa_relationship_kwargs={"cascade": "all,delete"},
     )
     reservations: list['Reservation'] = Relationship(back_populates='reserved_by')
 

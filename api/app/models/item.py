@@ -20,7 +20,7 @@ class Item(ItemBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     wishlist_id: int = Field(foreign_key="wishlist.id")
     wishlist: 'Wishlist' = Relationship(back_populates='items')
-    reservations: list['Reservation'] = Relationship(back_populates='item')
+    reservations: list['Reservation'] = Relationship(back_populates='item', sa_relationship_kwargs={"cascade": "all,delete"})
 
 class ItemCreate(ItemBase):
     pass

@@ -37,6 +37,7 @@ class WishlistCRUD(BaseCRUD):
             wishlist = Wishlist(**data.dict(), users=[user])
             self.s.add(wishlist)
             try:
+                await self.s.flush()
                 await self.s.refresh(wishlist)
             except UniqueViolationError:
                 continue
@@ -52,7 +53,8 @@ class WishlistCRUD(BaseCRUD):
 
     async def update(self, wishlist: 'Wishlist', data: WishlistPartialUpdate, as_user: UserType = NoUser) -> Wishlist:
         await self._ensure_user_can_modify_wishlist(wishlist, as_user)
-        self.s.add(wishlist.copy(update=data.dict(exclude_unset=True)))
+        wishlist.update(**data.dict(exclude_unset=True))
+        self.s.add(wishlist)
         return wishlist
 
     async def _ensure_user_can_modify_wishlist(self, wishlist: 'Wishlist', user: UserType = NoUser) -> None:

@@ -36,7 +36,7 @@ class ModelFactory(Generic[ModelType]):
             else:
                 raise TypeError(f"Default parameter factories must have 0 or 1 arguments. {fieldname} had {param_count}.")
         self.count += 1
-        return next_params
+        return kwargs | next_params
                 
     async def create(self, **kwargs) -> ModelType:
         instance = self.model_factory(**self.__get_next_params(**kwargs))
@@ -67,7 +67,7 @@ async def user_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFac
     return ModelFactory[User](asession, User, defaults)
 
 @pytest.fixture(name="Items")
-async def items_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFactory[Item]:
+async def item_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFactory[Item]:
     defaults = {
         'name': lambda: faker.word(part_of_speech="adjective").title() + " " + faker.word(part_of_speech="noun"),
         'image_url': lambda i: f"https://picsum.photos/id/{2000+i}/300/300",
@@ -86,3 +86,4 @@ async def wishlist_factory_fixture(faker: Faker, Items: ModelFactory[Item], ases
         'description': lambda: faker.paragraph(),
     }
     return ModelFactory[Wishlist](asession, Wishlist, defaults)
+
