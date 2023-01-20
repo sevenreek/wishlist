@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from ..utils.deps import get_current_user
 from ..models.wishlist import WishlistCreate, WishlistRead, WishlistPartialUpdate
-from ..models.item import Item, ItemCreate, ItemOut, ItemPartialUpdate
+from ..models.item import Item, ItemCreate, ItemDetailOut, ItemOut, ItemPartialUpdate
 from ..models import User
 from ..crud import WishlistCRUD
 from ..config import settings
@@ -63,28 +63,28 @@ async def index(Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_cu
 
 # Items
 
-@router.get("/{slug}/item/{item_id}", response_model=ItemOut)
-async def item_details(slug: str, item_id: int, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
+@router.get("/{slug}/items/{item_id}", response_model=ItemDetailOut)
+async def item_details(slug: str, item_id: int, Wishlists: WishlistCRUD = Depends()):
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.get_item(wishlist, item_id)
-    return ItemOut(**item.dict())
+    return item
 
-@router.post("/{slug}/item", response_model=ItemOut)
+@router.post("/{slug}/items", response_model=ItemOut)
 async def create_item(slug: str, data: ItemCreate, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.create_item(wishlist, data, user)
     await Wishlists.commit()
-    return ItemOut(**item.dict())
+    return ItemOut(**item.dict(), reserved=0)
     
-@router.patch("/{slug}/item/{item_id}", response_model=ItemOut)
+@router.patch("/{slug}/items/{item_id}", response_model=ItemOut)
 async def update_item(slug: str, item_id: int, data: ItemPartialUpdate, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.get_item(wishlist, item_id)
     item = await Wishlists.update_item(wishlist, item, data, user)
     await Wishlists.commit()
-    return ItemOut(**item.dict())
+    return ItemOut(**item.dict(), reserved=len(item.reservations))
     
-@router.delete("/{slug}/item/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{slug}/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_item(slug: str, item_id: int, Wishlists: WishlistCRUD = Depends(), user: User = Depends(get_current_user)):
     wishlist = await Wishlists.get_by_slug(slug)
     item = await Wishlists.get_item(wishlist, item_id)

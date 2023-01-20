@@ -6,7 +6,7 @@ from inspect import signature
 from faker import Faker
 from random import randrange
 
-from ..models import Wishlist, User, Item
+from ..models import Wishlist, User, Item, Reservation
 from ..config import settings
 from ..utils.auth import hash_password
 
@@ -25,11 +25,15 @@ class ModelFactory(Generic[ModelType]):
             default = self.defaults.get(fieldname, None)
             override = kwargs.get(fieldname, None)
             value = override or default
-            if not callable(value):
+            if value is None:
+                continue
+            elif not callable(value):
                 next_params[fieldname] = value
                 continue
             param_count = len(signature(value).parameters)
-            if param_count == 1:
+            if param_count == 2:
+                next_params[fieldname] = value(self.count, self.defaults | kwargs)
+            elif param_count == 1:
                 next_params[fieldname] = value(self.count)
             elif param_count == 0:
                 next_params[fieldname] = value()
@@ -86,4 +90,11 @@ async def wishlist_factory_fixture(faker: Faker, Items: ModelFactory[Item], ases
         'description': lambda: faker.paragraph(),
     }
     return ModelFactory[Wishlist](asession, Wishlist, defaults)
+
+@pytest.fixture(name="Reservations")
+async def reservation_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFactory[Reservation]:
+    defaults = {
+        'reserved_by_name': lambda: faker.name(),
+    }
+    return ModelFactory[Reservation](asession, Reservation, defaults)
 

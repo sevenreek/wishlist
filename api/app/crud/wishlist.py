@@ -2,6 +2,7 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy import delete, select, func
 from typing import TYPE_CHECKING, Union
 from asyncpg.exceptions import UniqueViolationError
+from sqlalchemy.orm import selectinload
 
 from ..constants import errors
 from ..utils.slugs import DEFAULT_SLUG_UNIQUENESS_ATTEMPTS
@@ -75,7 +76,9 @@ class WishlistCRUD(BaseCRUD):
     # Items
     async def get_item(self, wishlist: 'Wishlist', item_id: int) -> Item:
         result = await self.s.execute(
-            select(Item).where(Item.wishlist_id == wishlist.id).where(Item.id == item_id)
+            select(Item)
+            .options(selectinload(Item.reservations))
+            .where(Item.wishlist_id == wishlist.id).where(Item.id == item_id)
         )
         result = result.scalar_one_or_none()
         if result is None:
@@ -105,7 +108,7 @@ class WishlistCRUD(BaseCRUD):
         
     async def update_item(self, in_wishlist: 'Wishlist', item: 'Item', data: 'ItemPartialUpdate', as_user: UserType = NoUser) -> 'Item':
         await self._ensure_user_can_modify_wishlist(in_wishlist, as_user)
-        self.s.add(item.copy(update=data.dict(exclude_unset=True)))
+        self.s.add(item.update(**data.dict(exclude_unset=True)))
         return item
 
     async def delete_item(self, in_wishlist: 'Wishlist', item: 'Item', as_user: UserType = NoUser) -> None:

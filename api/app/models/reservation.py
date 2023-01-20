@@ -21,6 +21,6 @@ class ReservationCreate(ReservationBase):
     wishlist_slug: str
     item_slug: str
 
-class ReservationRead(Reservation):
-    pass
+class ReservationRead(ReservationBase):
+    id: int
 

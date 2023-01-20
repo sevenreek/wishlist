@@ -3,14 +3,14 @@ from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING, Optional
 
 from ..utils.slugs import generate_wishlist_slug
-from .updateable import UpdateableModel
+from .updateable import Updateable
 
 if TYPE_CHECKING:
     from app.models import Item, User
 
 from .users_wishlists import UsersWishlists
 
-class WishlistBase(UpdateableModel):
+class WishlistBase(Updateable):
     name: str = Field(index=True)
     image_url: AnyUrl | None
     description: str | None
