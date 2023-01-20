@@ -7,7 +7,7 @@ from .utils import Timestamped
 
 if TYPE_CHECKING:
     from ..models import Wishlist, Reservation
-from ..models.reservation import ReservationRead
+from ..models.reservation import ReservationOut
 from ..models.updateable import Updateable
 
 class ItemBase(Timestamped, Updateable):
@@ -15,7 +15,7 @@ class ItemBase(Timestamped, Updateable):
     image_url: AnyUrl | None
     shop_url: AnyUrl | None
     description: str | None
-    quantity: int = 1
+    quantity: int = Field(default=1, ge=0)
     price: int | None = None
     priority: int | None = Field(default=None, ge=0, le=4) 
 
@@ -34,7 +34,7 @@ class ItemOut(ItemBase):
 
 class ItemDetailOut(ItemBase):
     id: int
-    reservations: list['ReservationRead']
+    reservations: list['ReservationOut']
 
 class ItemPartialUpdate(ItemBase):
     __annotations__ = {k: Optional[v] for k, v in ItemBase.__annotations__.items()}

@@ -19,6 +19,8 @@ pytest-asyncio = "*"
 faker = "*"
 
 [dev-packages]
+python-lsp-server = "*"
+python-lsp-black = "*"
 
 [requires]
 python_version = "3.11"
