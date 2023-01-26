@@ -166,6 +166,18 @@ class WishlistCRUD(BaseCRUD):
         await self.s.flush()
 
     # Reservation
+    async def get_reservation(self, reservation_id: int) -> Reservation:
+        result = await self.s.execute(
+            select(Reservation)
+            .where(Reservation.id == reservation_id)
+        )
+        result = result.scalar_one_or_none()
+        if result is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=errors.RECORD_NOT_FOUND
+            )
+        return result
+
     async def _ensure_user_can_modify_reservation(
         self, reservation: Reservation, user: "User"
     ) -> None:

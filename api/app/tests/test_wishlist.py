@@ -51,9 +51,8 @@ class TestWishlist():
             assert any((ItemOut(**actual_item.dict(), reserved=0) == item for actual_item in items[5:10]))
 
     @pytest.mark.asyncio
-    async def test_update(self, aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], user_auth: tuple[User, str]):
-        user, access_token = user_auth
-        wishlist = await Wishlists.create(users=[user])
+    async def test_update(self, aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], user_auth: UserAuth):
+        wishlist = await Wishlists.create(users=[user_auth.user])
         await asession.commit()
         update_data={
             'name':'Updated wishlist',
@@ -63,7 +62,7 @@ class TestWishlist():
         response = await aclient.patch(
             f"/lists/{wishlist.slug}",
             json=update_data,
-            headers={'Authorization': 'Bearer ' + access_token},
+            headers={'Authorization': 'Bearer ' + user_auth.token},
         )
         assert response.status_code == 200
         data = response.json()
@@ -71,8 +70,7 @@ class TestWishlist():
             assert data[k] == update_data[k]
 
     @pytest.mark.asyncio
-    async def test_create(self, aclient: AsyncClient, asession: AsyncSession, user_auth: tuple[User, str]):
-        _, access_token = user_auth
+    async def test_create(self, aclient: AsyncClient, asession: AsyncSession, user_auth: UserAuth):
         create_data={
             'name':'New wishlist',
             'image_url': 'https://example.com/',
@@ -81,7 +79,7 @@ class TestWishlist():
         response = await aclient.post(
             f"/lists",
             json=create_data,
-            headers={'Authorization': 'Bearer ' + access_token},
+            headers={'Authorization': 'Bearer ' + user_auth.token},
         )
         assert response.status_code == 200
         data = response.json()
@@ -93,13 +91,12 @@ class TestWishlist():
             assert wishlist_in_db[k] == create_data[k]
 
     @pytest.mark.asyncio
-    async def test_delete(self, aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], user_auth: tuple[User, str]):
-        user, access_token = user_auth
-        wishlist = await Wishlists.create(users=[user])
+    async def test_delete(self, aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], user_auth: UserAuth):
+        wishlist = await Wishlists.create(users=[user_auth.user])
         await asession.commit()
         response = await aclient.delete(
             f"/lists/{wishlist.slug}",
-            headers={'Authorization': 'Bearer ' + access_token},
+            headers={'Authorization': 'Bearer ' + user_auth.token},
         )
         assert response.status_code == 204
         db_content = await asession.execute(select(Wishlist))
@@ -108,13 +105,12 @@ class TestWishlist():
         assert db_content.fetchone() == None
 
     @pytest.mark.asyncio
-    async def test_index(self, aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], user_auth: tuple[User, str]):
-        user, access_token = user_auth
-        wishlists = await Wishlists.create_list(10, users=[user])
+    async def test_index(self, aclient: AsyncClient, asession: AsyncSession, Wishlists: ModelFactory[Wishlist], user_auth: UserAuth):
+        wishlists = await Wishlists.create_list(10, users=[user_auth.user])
         await asession.commit()
         response = await aclient.get(
             f"/lists",
-            headers={'Authorization': 'Bearer ' + access_token},
+            headers={'Authorization': 'Bearer ' + user_auth.token},
         )
         assert response.status_code == 200
         data = response.json()

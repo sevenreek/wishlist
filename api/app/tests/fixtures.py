@@ -1,5 +1,7 @@
+from collections import namedtuple
 from typing import AsyncIterable
 import asyncio
+from pydantic import BaseModel
 import pytest
 from sqlmodel import SQLModel
 from fastapi.testclient import TestClient
@@ -61,17 +63,19 @@ async def async_client_fixture(asession: AsyncSession):
     yield aclient 
     app.dependency_overrides.clear() 
 
+
+UserAuth = namedtuple("UserAuth", ['user', 'token'])
+
 @pytest.fixture(name="anon_auth")
-async def anon_user_fixture(asession: AsyncSession) -> tuple[User,str]:
-    u = User()
-    asession.add(u)
-    await asession.commit()
-    await asession.refresh(u)
-    return u, create_access_token(u.uuid)
+async def anon_user_fixture(asession: AsyncSession) -> UserAuth:
+    user = User()
+    asession.add(user)
+    await asession.flush()
+    return UserAuth(user=user, token=create_access_token(user.uuid))
 
 @pytest.fixture(name="user_auth")
-async def user_fixture(asession: AsyncSession) -> tuple[User,str]:
-    u = User(
+async def user_fixture(asession: AsyncSession) -> UserAuth:
+    user = User(
         email="user@example.com", # pyright: ignore
         username="username",
         first_name="John",
@@ -79,9 +83,8 @@ async def user_fixture(asession: AsyncSession) -> tuple[User,str]:
         password_hash=hash_password("password"),
         avatar_url="http://example.com" # pyright: ignore
     ) 
-    asession.add(u)
-    await asession.commit()
-    await asession.refresh(u)
-    return u, create_access_token(u.uuid)
+    asession.add(user)
+    await asession.flush()
+    return UserAuth(user=user, token=create_access_token(user.uuid))
 
 

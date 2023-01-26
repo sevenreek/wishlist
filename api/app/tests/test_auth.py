@@ -1,10 +1,8 @@
-from typing import AsyncIterable
 from uuid import UUID
 import pytest
 from sqlalchemy import select
 
 from app.models.user import User, UserOut
-from app.utils.auth import hash_password
 from .fixtures import *
 
 @pytest.mark.asyncio
@@ -38,7 +36,7 @@ async def test_signup(aclient: AsyncClient, asession: AsyncSession):
     assert UUID(data['uuid']) 
 
 @pytest.mark.asyncio
-async def test_login(aclient: AsyncClient, user: User):
+async def test_login(aclient: AsyncClient, user_auth: UserAuth):
     response = await aclient.post(
         "/auth/login",
         data={
@@ -50,7 +48,7 @@ async def test_login(aclient: AsyncClient, user: User):
     assert response.status_code == 200
     data = response.json()
     response_user = UserOut(**data['user'])
-    user_in_db = UserOut(**user.dict())
+    user_in_db = UserOut(**user_auth.user.dict())
     assert response_user == user_in_db
     assert data['access_token']
     assert data['refresh_token']
@@ -71,17 +69,17 @@ async def test_asignup(aclient: AsyncClient, asession: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_alogin(aclient: AsyncClient, anon_user: User):
+async def test_alogin(aclient: AsyncClient, anon_auth: UserAuth):
     response = await aclient.post(
         "/auth/alogin",
         json={
-            'uuid': str(anon_user.uuid)
+            'uuid': str(anon_auth.user.uuid)
         }
     )
     assert response.status_code == 200
     data = response.json()
     response_user = UserOut(**data['user'])
-    user_in_db = UserOut(**anon_user.dict())
+    user_in_db = UserOut(**anon_auth.user.dict())
     assert response_user == user_in_db
     assert data['access_token']
     assert data['refresh_token']

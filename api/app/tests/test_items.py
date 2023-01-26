@@ -17,7 +17,7 @@ class TestItems():
             Wishlists: ModelFactory[Wishlist],
             Items: ModelFactory[Item],
             Reservations: ModelFactory[Reservation],
-            Users: ModelFactory[User],
+            Users: ModelFactory[User]
         ):
         users = await Users.create_list(2)
         wishlist = await Wishlists.create(items=[])
@@ -38,10 +38,9 @@ class TestItems():
             aclient: AsyncClient,
             asession: AsyncSession,
             Wishlists: ModelFactory[Wishlist],
-            user_auth: tuple[User, str]
+            user_auth: UserAuth
         ):
-        user, token = user_auth
-        wishlist = await Wishlists.create(users=[user])
+        wishlist = await Wishlists.create(users=[user_auth.user])
         await asession.commit()
         input_data={
             'name': 'item',
@@ -54,7 +53,7 @@ class TestItems():
         }
         response = await aclient.post(
             f"/lists/{wishlist.slug}/items",
-            headers={'Authorization': 'Bearer ' + token},
+            headers={'Authorization': 'Bearer ' + user_auth.token},
             json=input_data
         )
         assert response.status_code == 200
@@ -69,10 +68,9 @@ class TestItems():
             asession: AsyncSession,
             Wishlists: ModelFactory[Wishlist],
             Items: ModelFactory[Item],
-            user_auth: tuple[User, str]
+            user_auth: UserAuth
         ):
-        user, token = user_auth
-        wishlist = await Wishlists.create(users=[user], items=[])
+        wishlist = await Wishlists.create(users=[user_auth.user], items=[])
         item = await Items.create(wishlist=wishlist)
         await asession.commit()
         input_data={
@@ -86,7 +84,7 @@ class TestItems():
         }
         response = await aclient.patch(
             f"/lists/{wishlist.slug}/items/{item.id}",
-            headers={'Authorization': 'Bearer ' + token},
+            headers={'Authorization': 'Bearer ' + user_auth.token},
             json=input_data
         )
         assert response.status_code == 200
@@ -101,15 +99,14 @@ class TestItems():
             asession: AsyncSession,
             Wishlists: ModelFactory[Wishlist],
             Items: ModelFactory[Item],
-            user_auth: tuple[User, str]
+            user_auth: UserAuth
         ):
-        user, token = user_auth
-        wishlist = await Wishlists.create(users=[user], items=[])
+        wishlist = await Wishlists.create(users=[user_auth.user], items=[])
         item = await Items.create(wishlist=wishlist)
         await asession.commit()
         response = await aclient.delete(
             f"/lists/{wishlist.slug}/items/{item.id}",
-            headers={'Authorization': 'Bearer ' + token}
+            headers={'Authorization': 'Bearer ' + user_auth.token}
         )
         assert response.status_code == 204
         item_in_db = await asession.execute(select(Item))

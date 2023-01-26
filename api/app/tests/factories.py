@@ -1,7 +1,6 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Callable, TypeVar, Generic, Any
-from sqlmodel import SQLModel
+from typing import TypeVar, Generic, Any
 from inspect import signature
 from faker import Faker
 from random import randrange
@@ -43,7 +42,8 @@ class ModelFactory(Generic[ModelType]):
         return kwargs | next_params
                 
     async def create(self, **kwargs) -> ModelType:
-        instance = self.model_factory(**self.__get_next_params(**kwargs))
+        params = self.__get_next_params(**kwargs)
+        instance = self.model_factory(**params)
         self.s.add(instance)
         await self.s.flush()
         return instance
@@ -76,6 +76,7 @@ async def item_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFac
         'name': lambda: faker.word(part_of_speech="adjective").title() + " " + faker.word(part_of_speech="noun"),
         'image_url': lambda i: f"https://picsum.photos/id/{2000+i}/300/300",
         'description': lambda: faker.paragraph(nb_sentences=1),
+        'quantity': lambda: randrange(3),
         'shop_url': 'https://example.com',
         'price': lambda: randrange(10000),
         'priority': lambda: randrange(5),
@@ -83,7 +84,7 @@ async def item_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFac
     return ModelFactory[Item](asession, Item, defaults)
 
 @pytest.fixture(name="Wishlists")
-async def wishlist_factory_fixture(faker: Faker, Items: ModelFactory[Item], asession: AsyncSession) -> ModelFactory[Wishlist]:
+async def wishlist_factory_fixture(faker: Faker, asession: AsyncSession) -> ModelFactory[Wishlist]:
     defaults = {
         'name': lambda: faker.word(part_of_speech="adjective").title() + " wishlist",
         'image_url': lambda i: f"https://picsum.photos/id/{3000+i}/300/300",
