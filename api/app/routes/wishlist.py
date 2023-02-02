@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 from ..utils.deps import get_current_user
-from ..models.wishlist import WishlistCreate, WishlistRead, WishlistPartialUpdate
+from ..models.wishlist import WishlistCreate, WishlistIndexRead, WishlistRead, WishlistPartialUpdate
 from ..models.item import ItemCreate, ItemDetailOut, ItemOut, ItemPartialUpdate
 from ..models.reservation import (
     ReservationCreate,
@@ -19,30 +19,25 @@ from ..utils import clamp
 router = APIRouter(prefix="/lists", tags=["wishlist"])
 
 
-class WishlistContent(BaseModel):
-    wishlist: WishlistRead
-    items: List[ItemOut]
 
 
 # Wishlist
 
 
-@router.get("/{slug}", response_model=WishlistContent)
+@router.get("/{slug}", response_model=WishlistIndexRead)
 async def details(
     slug: str,
     page: int = 1,
     limit: int = settings.wishlist_items_limit,
     Wishlists: WishlistCRUD = Depends(),
-) -> WishlistContent:
+) -> WishlistIndexRead:
 
     page = max(1, page)
     limit = clamp(1, limit, settings.wishlist_items_limit_max)
     offset = (page - 1) * limit
     wishlist = await Wishlists.get_by_slug(slug)
     items = await Wishlists.index_wishlist_items(wishlist, offset=offset, limit=limit)
-    r_wishlist = WishlistRead(**wishlist.dict())
-    await Wishlists.commit()
-    return WishlistContent(wishlist=r_wishlist, items=items)
+    return WishlistIndexRead(**wishlist.dict(), items=items)
 
 
 @router.patch("/{slug}", response_model=WishlistRead)

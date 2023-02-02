@@ -2,11 +2,14 @@ from pydantic import AnyUrl
 from sqlmodel import Field, Relationship
 from typing import TYPE_CHECKING, Optional
 
+
 from ..utils.slugs import generate_wishlist_slug
 from .updateable import Updateable
+from app.models.item import ItemOut
 
 if TYPE_CHECKING:
     from app.models import Item, User
+
 
 from .users_wishlists import UsersWishlists
 
@@ -30,10 +33,14 @@ class Wishlist(WishlistBase, table=True):
     )
 
 class WishlistCreate(WishlistBase):
-    pass
+    id: int
 
-class WishlistRead(Wishlist):
-    pass
+class WishlistRead(WishlistBase):
+    id: int
+    slug: str
+
+class WishlistIndexRead(WishlistRead):
+    items: list['ItemOut']
 
 class WishlistPartialUpdate(WishlistBase):
     __annotations__ = {k: Optional[v] for k, v in WishlistBase.__annotations__.items()}
