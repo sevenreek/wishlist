@@ -1,8 +1,8 @@
-import {fetchWishlist} from '$lib/api/wishlist'
+import { fetchWishlist } from '$lib/api/wishlist';
+import type { PageLoad, PageLoadEvent } from './$types'
 
-/** @type {import('./$types').PageLoad} */
-export async function load({ params }) {
-  const items = await fetchWishlist(params.wishlist_slug)
-  return items
+export const load: PageLoad = async ({ params }: PageLoadEvent) => {
+  const wishlist = await fetchWishlist(params.wishlist_slug);
+  return wishlist;
 }
 
