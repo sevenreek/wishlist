@@ -1,0 +1,17 @@
+{
+  "wishlist": {
+    "item": {
+      "reserve": "Reserve"
+    },
+    "itemDetails": {
+      "storeLink": "Visit store",
+      "reserveCount0": "Reserve ",
+      "reserveCount1": " out of ",
+      "reserveCount2": " requested.",
+      "reserveAs": "as ",
+      "reserveOr": "or",
+      "reserveAnonymously": "Reserve anonymously",
+      "confirmReserve": "Confirm reservation"
+    }
+  }
+}

@@ -5,6 +5,7 @@
 	import SquareImage from '$lib/components/SquareImage.svelte';
 	import IconButton from '$lib/components/IconButton.svelte';
 	import Input from '$lib/components/Input.svelte';
+	import { t } from '$lib/translations';
 	export let data;
 	const { name, image_url, description, quantity, reserved, price, shop_url } = data;
 	let values = {
@@ -30,8 +31,8 @@
 
 					{#if shop_url}
 						<a href={shop_url} class="pl-1.5 text-gray-600 hover:text-orange-700">
-							Visit store
-							<div class='inline-block w-3 h-3'>
+							{$t('common.wishlist.itemDetails.storeLink')}
+							<div class="inline-block w-3 h-3">
 								<MdOpenInNew slot="icon" />
 							</div>
 						</a>
@@ -48,12 +49,13 @@
 			</div>
 			<div class="flex flex-col gap-2 justify-end justify-items-stretch">
 				<span>
-					Reserve
+					{$t('common.wishlist.itemDetails.reserveCount0')}
 					<Input type="number" width="w-20" bind:value={values.count} />
-					<span>out of </span><span>{quantity}&nbsp;requested</span>
+					<span>{$t('common.wishlist.itemDetails.reserveCount1')}</span>
+					<span>{quantity}&nbsp;{$t('common.wishlist.itemDetails.reserveCount2')}</span>
 				</span>
 				<div class="flex flex-row items-center gap-2">
-					<span class="grow-0">as</span>
+					<span class="grow-0">{$t('common.wishlist.itemDetails.reserveAs')}</span>
 					<input
 						class="border p-1 rounded-lg inline-block w-100 grow"
 						type="text"
@@ -61,12 +63,13 @@
 					/>
 				</div>
 				<span>
-					or
+					{$t('common.wishlist.itemDetails.reserveOr')}
 					<label class="text-gray-500">
-						<input class="inline mr-2 ml-1" type="checkbox" />Reserve anonymously
+						<input class="inline mr-2 ml-1" type="checkbox" />
+						{$t('common.wishlist.itemDetails.reserveAnonymously')}
 					</label>
 				</span>
-				<IconButton size="lg" on:click={() => alert('hello')} text="Confirm reservation">
+				<IconButton size="lg" on:click={() => alert('hello')} text="{$t('common.wishlist.itemDetails.confirmReserve')}">
 					<MdLockOutline slot="icon" />
 				</IconButton>
 			</div>
